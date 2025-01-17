@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { error } from 'console';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 jest.mock('../prisma/prisma.service');
 jest.mock('@nestjs/jwt');
@@ -74,7 +75,7 @@ describe('AuthService', () => {
       Error.meta = { target: ['email'] };
       jest.spyOn(prismaService.user, 'create').mockRejectedValue(Error);
 
-      await expect(service.register(registerDto)).rejects.toThrow('Email already exists');
+      await expect(service.register(registerDto)).rejects.toThrow(new ConflictException('Email already exists'));
     });
   });
 
@@ -96,7 +97,7 @@ describe('AuthService', () => {
       const loginDto: LoginDto = { email: 'invalid@email.com', password: 'invalid' };
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow('Invalid credentials');
+      await expect(service.login(loginDto)).rejects.toThrow(new UnauthorizedException('Invalid credentials'));
     });
   });
 });

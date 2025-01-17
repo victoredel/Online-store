@@ -8,33 +8,33 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  hash      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id        String   @id @default(uuid()) // Unique identifier for each user, generated as UUID
+  email     String   @unique // User's email address, must be unique
+  name      String? // Optional user's name
+  hash      String // Hashed password for the user
+  createdAt DateTime @default(now()) // Timestamp when the user was created
+  updatedAt DateTime @updatedAt // Timestamp when the user was last updated
+  orders    Order[] // List of orders placed by the user
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String
-  price       Decimal
-  stock       Int
-  category    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  orders      Order[]  @relation("OrderProducts")
+  id          String   @id @default(uuid()) // Unique identifier for each product, generated as UUID
+  name        String // Name of the product
+  description String // Description of the product
+  price       Decimal // Price of the product
+  stock       Int // Available stock for the product
+  category    String // Category to which the product belongs
+  createdAt   DateTime @default(now()) // Timestamp when the product was created
+  updatedAt   DateTime @updatedAt // Timestamp when the product was last updated
+  orders      Order[]  @relation("OrderProducts") // List of orders that include this product
 }
 
 model Order {
-  id         String    @id @default(uuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id])
-  products   Product[] @relation("OrderProducts")
-  totalPrice Decimal
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id         String    @id @default(uuid()) // Unique identifier for each order, generated as UUID
+  userId     String // Foreign key linking to the User who placed the order
+  user       User      @relation(fields: [userId], references: [id]) // Relation to the User model
+  products   Product[] @relation("OrderProducts") // List of products included in the order
+  totalPrice Decimal // Total price for the order
+  createdAt  DateTime  @default(now()) // Timestamp when the order was created
+  updatedAt  DateTime  @updatedAt // Timestamp when the order was last updated
 }

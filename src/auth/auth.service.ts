@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto, LoginDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { User } from '@prisma/client';
+import { Sign } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -12,12 +14,13 @@ export class AuthService {
     async register(registerDto: RegisterDto) {
         try {
             const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-            return await this.prisma.user.create({
+            const user = await this.prisma.user.create({
                 data: {
                     email: registerDto.email,
                     hash: hashedPassword,
                 },
             });
+            return this.SignToken(user);
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError) {
                 if (error.code === 'P2002' && error.meta.target) {
@@ -37,6 +40,11 @@ export class AuthService {
         if (!user || !(await bcrypt.compare(loginDto.password, user.hash))) {
             throw new UnauthorizedException('Invalid credentials');
         }
+        const payload = { email: user.email, sub: user.id };
+        return this.SignToken(user);
+    }
+
+    async SignToken(user: User) {
         const payload = { email: user.email, sub: user.id };
         return {
             accessToken: this.jwtService.sign(payload),

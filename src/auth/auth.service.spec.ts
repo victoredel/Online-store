@@ -58,9 +58,11 @@ describe('AuthService', () => {
       const user = { id: '1', email: 'test@email.com' } as User;
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
       jest.spyOn(prismaService.user, 'create').mockResolvedValue(user);
-
+      jest.spyOn(jwtService, 'sign').mockReturnValue('test_token');
       const result = await service.register(registerDto);
-      expect(result).toBe(user);
+      expect(result).toStrictEqual({ accessToken: 'test_token' });
+      expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
+    
       expect(prismaService.user.create).toHaveBeenCalledWith({
         data: {
           email: registerDto.email,
@@ -81,7 +83,7 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return JWT token if credentials are valid', async () => {
-      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' };
+      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' , role: 'admin'};
       const user = { id: '1', email: 'test@email.com', hash: 'hashedPassword' } as User;
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
@@ -94,7 +96,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if credentials are invalid', async () => {
-      const loginDto: LoginDto = { email: 'invalid@email.com', password: 'invalid' };
+      const loginDto: LoginDto = { email: 'invalid@email.com', password: 'invalid' , role: 'admin'};
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(new UnauthorizedException('Invalid credentials'));

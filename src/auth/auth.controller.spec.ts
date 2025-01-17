@@ -50,13 +50,13 @@ describe('AuthController', () => {
 
   describe('login', () => {
     it('should call AuthService.login with correct parameters', async () => {
-      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' };
+      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123', role: 'admin' };
       await controller.login(loginDto);
       expect(authService.login).toHaveBeenCalledWith(loginDto);
     });
 
     it('should return the result of AuthService.login', async () => {
-      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' };
+      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123', role: 'admin' };
       const result = { accessToken: 'test_token' };
       mockAuthService.login.mockResolvedValue(result);
 

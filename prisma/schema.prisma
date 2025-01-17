@@ -12,6 +12,7 @@ model User {
   email     String   @unique // User's email address, must be unique
   name      String? // Optional user's name
   hash      String // Hashed password for the user
+  role      String   @default("user") // User's role, default is "user"
   createdAt DateTime @default(now()) // Timestamp when the user was created
   updatedAt DateTime @updatedAt // Timestamp when the user was last updated
   orders    Order[] // List of orders placed by the user
@@ -20,7 +21,7 @@ model User {
 model Product {
   id          String   @id @default(uuid()) // Unique identifier for each product, generated as UUID
   name        String // Name of the product
-  description String // Description of the product
+  description String? // Description of the product
   price       Decimal // Price of the product
   stock       Int // Available stock for the product
   category    String // Category to which the product belongs

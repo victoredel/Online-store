@@ -1,19 +1,37 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class OrderService {
     constructor(private prisma: PrismaService) { }
 
     // Crear una nueva orden
+
     async create(createOrderDto: CreateOrderDto, userId: string) {
-        return this.prisma.order.create({
-            data: {
-                ...createOrderDto,
-                userId,
-            },
-        });
+        try {
+            return await this.prisma.order.create({
+                data: {
+                    products: {
+                        connect: createOrderDto.productIds.map(id => ({ id })),
+                    },
+                    totalPrice: createOrderDto.totalPrice,
+                    userId,
+                },
+            });
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError) {
+                if (error.code === 'P2003') {
+                    throw new Error('Foreign key constraint failed. One or more product IDs do not exist.');
+                }
+                // Manejo de otros códigos de error específicos de Prisma
+                // Puedes añadir más condiciones aquí según los códigos de error que desees manejar
+                else {
+                    throw new ForbiddenException('An unexpected error occurred. Please try again.');
+                }
+            }
+        }
     }
 
     // Listar las órdenes del usuario autenticado

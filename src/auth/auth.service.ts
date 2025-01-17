@@ -18,6 +18,7 @@ export class AuthService {
                 data: {
                     email: registerDto.email,
                     hash: hashedPassword,
+                    role: registerDto.role,
                 },
             });
             return this.SignToken(user);
@@ -45,7 +46,8 @@ export class AuthService {
     }
 
     async SignToken(user: User) {
-        const payload = { email: user.email, sub: user.id };
+        const payload = { email: user.email, sub: user.id, role: user.role };
+        // console.log(payload);
         return {
             accessToken: this.jwtService.sign(payload),
         };

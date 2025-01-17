@@ -9,8 +9,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 @ApiTags('products')
 @ApiBearerAuth()
 @Controller('products')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductController {
-    constructor(private readonly productService: ProductService) { }
+    constructor(private readonly productService: ProductService) {}
 
     @Get()
     @ApiOperation({ summary: 'Get all products' })
@@ -20,8 +21,7 @@ export class ProductController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
+    @Roles('admin')  // Asegúrate de que el rol sea 'admin' o el rol correspondiente
     @ApiOperation({ summary: 'Create a new product' })
     @ApiResponse({ status: 201, description: 'The product has been successfully created.' })
     @ApiResponse({ status: 400, description: 'Invalid input.' })
@@ -30,20 +30,20 @@ export class ProductController {
     }
 
     @Put(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
+    @Roles('admin')  // Asegúrate de que el rol sea 'admin' o el rol correspondiente
     @ApiOperation({ summary: 'Update an existing product' })
     @ApiResponse({ status: 200, description: 'The product has been successfully updated.' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Product not found.' })
     async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
         return this.productService.update(id, updateProductDto);
     }
 
     @Delete(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('admin')
+    @Roles('admin')  // Asegúrate de que el rol sea 'admin' o el rol correspondiente
     @ApiOperation({ summary: 'Delete a product' })
     @ApiResponse({ status: 200, description: 'The product has been successfully deleted.' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Product not found.' })
     async delete(@Param('id') id: string) {
         return this.productService.delete(id);

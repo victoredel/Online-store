@@ -53,17 +53,15 @@ export class ProductService {
     async update(id: string, updateProductDto: UpdateProductDto) {
 
         try {
-            const product = await this.prisma.product.update({
-
+            return await this.prisma.product.update({
                 where: { id },
                 data: updateProductDto,
             });
-            if (!product) {
-                throw new NotFoundException('Product not found');
-            }
-            return product;
         } catch (error) {
             if (error instanceof PrismaClientKnownRequestError) {
+                if (error.code === 'P2025') {
+                    throw new NotFoundException('Product not found');
+                }
                 if (error.code === 'P2002' && error.meta.target) {
                     const target = error.meta.target as string[];
                     if (target.includes('name')) {

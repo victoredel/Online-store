@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { Prisma, Product } from '@prisma/client';
+import { Order, Prisma, Product } from '@prisma/client';
 
 // Mock PrismaService with Jest
 jest.mock('../prisma/prisma.service');
@@ -27,6 +27,10 @@ describe('ProductService', () => {
               findUnique: jest.fn(),
               delete: jest.fn(),
             },
+            order: {
+              findMany: jest.fn(),
+              length: jest.fn(),
+            },
           },
         },
       ],
@@ -42,6 +46,7 @@ describe('ProductService', () => {
 
   let expectedResult = [{
   }] as Product[];
+  expectedResult[0].id = '1';
   expectedResult[0].price = new Prisma.Decimal(100);
   expectedResult[0].category = 'electronics';
   expectedResult[0].stock = 10;
@@ -185,18 +190,24 @@ describe('ProductService', () => {
 
   describe('delete', () => {
     it('should delete an existing product', async () => {
-
       jest.spyOn(prismaService.product, 'delete').mockResolvedValue(expectedResult[0]);
-
+      jest.spyOn(prismaService.order, 'findMany').mockResolvedValue([]);
       const result = await service.delete('1');
       expect(result).toEqual(expectedResult[0]);
       expect(prismaService.product.delete).toHaveBeenCalledWith({ where: { id: '1' } });
     });
-
     it('should throw NotFoundException if product is not found', async () => {
-      jest.spyOn(prismaService.product, 'delete').mockResolvedValue(null);
-
+      error.code = 'P2025';
+      jest.spyOn(prismaService.product, 'delete').mockImplementation(() => {
+        throw new PrismaClientKnownRequestError('Unique constraint failed', error);
+      });
+      jest.spyOn(prismaService.order, 'findMany').mockResolvedValue([]);
       await expect(service.delete('nonexistent_id')).rejects.toThrow(new NotFoundException('Product not found'));
+    });
+    it('should throw ConflictException if product has associated orders', async () => {
+      jest.spyOn(prismaService.order, 'findMany').mockResolvedValue([{ id: 'order1' }] as Order[]);
+      await expect(service.delete('1')).rejects.toThrow(
+        new ConflictException('Product is associated with orders'));
     });
   });
 });

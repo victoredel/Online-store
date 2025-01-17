@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ConflictException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Order } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
@@ -75,12 +76,24 @@ export class ProductService {
 
     // Eliminar un producto
     async delete(id: string) {
-        const product = await this.prisma.product.delete({
-            where: { id },
-        });
-        if (!product) {
-            throw new NotFoundException('Product not found');
+
+        const totalOrders = await this.prisma.order.findMany({
+            where: { products: { some: { id } } },
+        }) as Order[];
+        if ((totalOrders as Order[]).length > 0) {
+            throw new ConflictException('Product is associated with orders');
         }
-        return product;
+        try {
+            return await this.prisma.product.delete({
+                where: { id },
+            });
+        } catch (error) {
+            if (error instanceof PrismaClientKnownRequestError) {
+                if (error.code === 'P2025') {
+                    throw new NotFoundException('Product not found');
+                }
+            }
+            throw error;
+        }
     }
 }

@@ -31,7 +31,8 @@
     "@nestjs/swagger": "^11.0.2",
     "bcrypt": "^5.1.1",
     "class-validator": "^0.14.1",
-    "online-store": "file:"
+    "online-store": "file:",
+    "passport": "^0.7.0"
   },
   "jest": {
     "moduleFileExtensions": [

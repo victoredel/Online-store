@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto, LoginDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from '@prisma/client';
-import { Sign } from 'crypto';
 
 @Injectable()
 export class AuthService {

@@ -22,7 +22,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "pretest:dev": "npm run db:reset",
-    "test:dev": "jest --watch "
+    "test:dev": "jest --watch ",
+    "test": "jest"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",

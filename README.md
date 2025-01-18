@@ -44,6 +44,27 @@ $ npm run test
 $ npm run test:dev
 ```
 
+## Environment Setup
+
+Make sure to set the following environment variables in your `.env` file:
+
+```plaintext
+# PostgreSQL Database URL
+DATABASE_URL="postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?schema=<SCHEMA>"
+
+# JWT Secret Key
+JWT_SECRET="<YOUR_SECRET_KEY>"
+
+# PostgreSQL User
+POSTGRES_USER="<YOUR_POSTGRES_USER>"
+
+# PostgreSQL Password
+POSTGRES_PASSWORD="<YOUR_POSTGRES_PASSWORD>"
+
+# PostgreSQL Database Name
+POSTGRES_DB="<YOUR_POSTGRES_DB>"
+```
+
 ## Important Notice
 
 ⚠️ **Important:** To manage products or orders, you must be logged in as an admin user. Regular users do not have the necessary permissions to perform these actions.

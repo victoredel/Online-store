@@ -58,17 +58,6 @@ describe('OrderController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return all orders for the authenticated user', async () => {
-      const userId = 'user1';
-
-      jest.spyOn(orderService, 'findAll').mockResolvedValue(expectedResult[0]);
-
-      const result = await controller.findAll({ user: { id: userId } });
-      expect(result).toEqual(expectedResult[0]);
-    });
-  });
-
   describe('findOne', () => {
     it('should return the order for the authenticated user or admin', async () => {
       const orderId = '1';

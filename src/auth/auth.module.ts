@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard'; // Importa el guardia de roles
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
@@ -17,7 +18,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
     PrismaModule,
   ],
-  providers: [AuthService, PrismaService, JwtStrategy, JwtAuthGuard],
+  providers: [AuthService, PrismaService, JwtStrategy, JwtAuthGuard, RolesGuard], // Añadir RolesGuard a los proveedores
   controllers: [AuthController],
 })
-export class AuthModule {}
+export class AuthModule { }

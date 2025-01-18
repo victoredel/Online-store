@@ -8,6 +8,7 @@ import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { error } from 'console';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { CreateOrderDto } from 'src/order/dto';
 
 jest.mock('../prisma/prisma.service');
 jest.mock('@nestjs/jwt');
@@ -55,14 +56,14 @@ describe('AuthService', () => {
   describe('register', () => {
     it('should create a new user with hashed password', async () => {
       const registerDto: RegisterDto = { email: 'test@email.com', password: 'test123' };
-      const user = { id: '1', email: 'test@email.com' } as User;
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
+      const user = { email: 'test@email.com', hash: 'hashedPassword', role: 'user' } as User;
+      jest.spyOn(bcrypt, 'hash').mockImplementation(async () => 'hashedPassword');
       jest.spyOn(prismaService.user, 'create').mockResolvedValue(user);
       jest.spyOn(jwtService, 'sign').mockReturnValue('test_token');
       const result = await service.register(registerDto);
       expect(result).toStrictEqual({ accessToken: 'test_token' });
       expect(bcrypt.hash).toHaveBeenCalledWith(registerDto.password, 10);
-    
+
       expect(prismaService.user.create).toHaveBeenCalledWith({
         data: {
           email: registerDto.email,
@@ -83,10 +84,10 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return JWT token if credentials are valid', async () => {
-      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' , role: 'admin'};
+      const loginDto: LoginDto = { email: 'test@email.com', password: 'test123' };
       const user = { id: '1', email: 'test@email.com', hash: 'hashedPassword' } as User;
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(user);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
       jest.spyOn(jwtService, 'sign').mockReturnValue('test_token');
 
       const result = await service.login(loginDto);
@@ -96,7 +97,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if credentials are invalid', async () => {
-      const loginDto: LoginDto = { email: 'invalid@email.com', password: 'invalid' , role: 'admin'};
+      const loginDto: LoginDto = { email: 'invalid@email.com', password: 'invalid' };
       jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(new UnauthorizedException('Invalid credentials'));

@@ -59,3 +59,4 @@ prisma/migrations/migration_lock.toml
 prisma/migrations/20250117065046_init/migration.sql
 .test.env
 docker-compose.yml
+prisma/migrations/20250117173005_init/migration.sql
